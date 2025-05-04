@@ -9,49 +9,48 @@ interface PaginationProps {
 
 interface PaginationStore {
   pagination: PaginationProps;
-  setPagination: (pagination: PaginationProps) => void;
-  setPerPage: (perPage: number) => void;
-  setPage: (page: number) => void;
-  setHasNext: (hasNext: boolean) => void;
-  setTotalCount: (totalCount: number) => void;
-  setTotalNext: (hasNext: boolean, totalCount: number) => void;
+  setPagination: (pagination: Partial<PaginationProps>) => void;
+  setPage: (pageIndex: number) => void;
+  setPerPage: (pageSize: number) => void;
   resetPagination: () => void;
 }
 
 export const usePaginationStore = create<PaginationStore>((set) => ({
-  pagination: { pageIndex: 0, pageSize: 40, has_next: false, total_count: 0 },
-  setPagination: (pagination: PaginationProps) => set({ pagination }),
-  setPerPage: (perPage: number) =>
-    set((state) => ({
-      pagination: { ...state.pagination, pageSize: perPage },
-    })),
-  setPage: (page: number) =>
-    set((state) => ({
-      pagination: { ...state.pagination, pageIndex: page },
-    })),
-  setHasNext: (hasNext: boolean) =>
-    set((state) => ({
-      pagination: { ...state.pagination, has_next: hasNext },
-    })),
-  setTotalCount: (totalCount: number) =>
-    set((state) => ({
-      pagination: { ...state.pagination, total_count: totalCount },
-    })),
-  setTotalNext: (hasNext: boolean, totalCount: number) =>
+  pagination: {
+    pageIndex: 0,
+    pageSize: 10,
+    has_next: false,
+    total_count: 0,
+  },
+  setPagination: (pagination) =>
     set((state) => ({
       pagination: {
         ...state.pagination,
-        has_next: hasNext,
-        total_count: totalCount,
+        ...pagination,
+      },
+    })),
+  setPage: (pageIndex) =>
+    set((state) => ({
+      pagination: {
+        ...state.pagination,
+        pageIndex,
+      },
+    })),
+  setPerPage: (pageSize) =>
+    set((state) => ({
+      pagination: {
+        ...state.pagination,
+        pageSize,
+        pageIndex: 0, // reset to first page
       },
     })),
   resetPagination: () =>
-    set(() => ({
+    set({
       pagination: {
         pageIndex: 0,
         pageSize: 10,
         has_next: false,
         total_count: 0,
       },
-    })),
+    }),
 }));

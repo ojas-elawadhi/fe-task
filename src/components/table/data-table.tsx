@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   type Column,
   type ColumnDef,
@@ -32,6 +31,8 @@ import { usePaginationStore } from "@/store/pagination";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 import Link from "next/link";
+import React from "react";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -80,12 +81,18 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    pageCount: Math.ceil(pagination.total_count / pagination.pageSize),
+    manualPagination: true,
+    manualSorting: true, // ✅ Enable server-side sorting
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnPinning,
-      pagination,
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      },
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -94,12 +101,13 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     onColumnPinningChange: setColumnPinning,
     autoResetAll: false,
   });
+
+  const router = useRouter();
 
   const getCommonPinningStyles = (
     column: Column<TData, unknown>,
@@ -128,7 +136,7 @@ export function DataTable<TData, TValue>({
         boxShadow: "0px 5px 22px 0px #0000000D, 0px 0px 0px 2px #0000000F",
       }}
     >
-      <div className="flex items-center justify-between border-b border-[#DCDFE4] px-5 py-4">
+      {/* <div className="flex items-center justify-between border-b border-[#DCDFE4] px-5 py-4">
         <p className="text-2xl font-medium tracking-wide">{heading}</p>
         <div>
           <div className="flex flex-row items-center gap-2 text-sm text-[#667085]">
@@ -188,18 +196,18 @@ export function DataTable<TData, TValue>({
             )}
           </div>
         </div>
-      </div>
-      <div className="h-full px-5 py-4">
+      </div> */}
+      {/* <div className="h-full px-5 py-4">
         <DataTableToolbar
           table={table}
           filter={children}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
         />
-      </div>
-      <div className="relative max-h-[63vh] w-full overflow-auto border-t border-b">
+      </div> */}
+      <div className="relative max-h-[63vh] w-full overflow-auto border-b">
         <Table>
-          <TableHeader className="sticky top-0 z-10 bg-[#F9FAFB]">
+          <TableHeader className="sticky top-0 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -221,12 +229,16 @@ export function DataTable<TData, TValue>({
                       key={header.id}
                       colSpan={header.colSpan}
                       rowSpan={rowSpan}
-                      style={getCommonPinningStyles(header.column)}
+                      style={{
+                        ...getCommonPinningStyles(header.column),
+                        cursor: header.column.getCanSort()
+                          ? "pointer"
+                          : "default",
+                      }}
                       className={
-                        header.column.columnDef.header
-                          ? "border px-4 py-6"
-                          : "p-0"
+                        header.column.columnDef.header ? "px-4 py-6" : "p-0"
                       }
+                      onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -244,6 +256,8 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/products/${Number(row.id) + 1}`)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
