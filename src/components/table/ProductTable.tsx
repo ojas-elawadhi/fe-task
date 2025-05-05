@@ -8,19 +8,11 @@ import { useProducts } from "@/hooks/useProducts";
 import React from "react";
 import { DataTable } from "@/components/table/data-table";
 
-import {
-  useAddProduct,
-  useUpdateProduct,
-  useDeleteProduct,
-} from "../../hooks/useProductMutations";
+import { useDeleteProduct } from "../../hooks/useProductMutations";
+import Image from "next/image";
 import { ProductForm } from "../form/AddProductForm";
 import { usePaginationStore } from "@/store/pagination";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { type ColumnDef } from "@tanstack/react-table";
 export type Product = {
   id?: number;
   title?: string;
@@ -30,12 +22,12 @@ export type Product = {
   stock?: number;
   brand?: string;
   thumbnail?: string;
+  description: string; // Added description property
 };
 export default function ProductTable() {
-  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const { pagination, setPagination } = usePaginationStore();
-  const { pageIndex, pageSize } = pagination;
   const limit = pagination.pageSize;
   const skip = pagination.pageIndex * pagination.pageSize;
 
@@ -67,9 +59,11 @@ export default function ProductTable() {
       accessorKey: "thumbnail",
       header: "",
       cell: ({ row }) => (
-        <img
-          src={row.original.thumbnail}
-          alt={row.original.title}
+        <Image
+          src={row.original.thumbnail ?? "/placeholder.png"}
+          alt={row.original.title ?? "Product Image"}
+          width={64}
+          height={64}
           className="h-16 w-16 rounded object-cover"
         />
       ),
@@ -162,19 +156,27 @@ export default function ProductTable() {
         error={error}
         isLoading={isLoading}
         refetch={refetch}
-        columnVisibility={{}}
-        setColumnVisibility={() => {}}
         sorting={sorting}
         setSorting={setSorting}
-        columnFilters={[]}
-        setColumnFilters={() => {}}
       />
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="w-full max-w-md rounded bg-[#d2d2d2] p-4 shadow dark:bg-[#191919]">
             <ProductForm
-              product={editingProduct}
+              product={
+                editingProduct
+                  ? {
+                      ...editingProduct,
+                      id: editingProduct.id ?? 0, // Ensure id is a number
+                      title: editingProduct.title ?? "", // Ensure title is a string
+                      price: editingProduct.price ?? 0, // Ensure price is a number
+                      category: editingProduct.category ?? "", // Ensure category is a string
+                      brand: editingProduct.brand ?? "", // Ensure brand is a string
+                      stock: editingProduct.stock ?? 0, // Ensure stock is a number
+                    }
+                  : undefined
+              }
               onClose={() => setShowForm(false)}
             />
           </div>

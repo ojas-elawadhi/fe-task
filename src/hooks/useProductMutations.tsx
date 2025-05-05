@@ -6,11 +6,23 @@ import axios from "axios";
 
 const BASE_URL = "https://dummyjson.com/products";
 
+type Product = {
+  id: number;
+  title: string;
+  description?: string;
+  price: number;
+  category?: string;
+  brand?: string;
+  stock?: number;
+};
+
+type NewProductInput = Omit<Product, "id">;
+
 // Add Product
 export function useAddProduct() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<Product, Error, NewProductInput>({
     mutationFn: async (data: {
       title: string;
       description?: string;
@@ -20,11 +32,11 @@ export function useAddProduct() {
       stock?: number;
     }) => {
       const res = await axios.post(`${BASE_URL}/add`, data);
-      return res.data;
+      return res.data as Product;
     },
     onSuccess: (newProduct) => {
       toast.success("Product added successfully!");
-      queryClient.setQueryData(["products"], (old: any) => {
+      queryClient.setQueryData<Product[] | undefined>(["products"], (old) => {
         if (!old) return [newProduct];
         return [...old, newProduct];
       });
@@ -57,12 +69,12 @@ export function useUpdateProduct() {
         brand: data.brand,
         stock: data.stock,
       });
-      return res.data;
+      return res.data as Product;
     },
     onSuccess: (updatedProduct) => {
       toast.success("Product updated successfully!");
-      queryClient.setQueryData(["products"], (old: any) =>
-        old?.map((p: any) => (p.id === updatedProduct.id ? updatedProduct : p)),
+      queryClient.setQueryData<Product[] | undefined>(["products"], (old) =>
+        old?.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)),
       );
     },
     onError: () => {
@@ -76,14 +88,14 @@ export function useDeleteProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      const res = await axios.delete(`${BASE_URL}/${id}`);
-      return { id, ...res.data };
+    mutationFn: async (id: number): Promise<{ id: number }> => {
+      const res = await axios.delete<{ id: number }>(`${BASE_URL}/${id}`);
+      return res.data;
     },
     onSuccess: (deleted) => {
       toast.success("Product deleted successfully!");
-      queryClient.setQueryData(["products"], (old: any) =>
-        old?.filter((p: any) => p.id !== deleted.id),
+      queryClient.setQueryData<Product[] | undefined>(["products"], (old) =>
+        old?.filter((p) => p.id !== deleted.id),
       );
     },
     onError: () => {

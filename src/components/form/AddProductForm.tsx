@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAddProduct, useUpdateProduct } from "@/hooks/useProductMutations";
 import { useEffect } from "react";
-import { toast } from "react-toastify";
 
 const productSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -44,23 +43,23 @@ export function ProductForm({
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      title: product?.title || "",
-      description: product?.description || "",
-      price: product?.price || 1,
-      category: product?.category || "",
-      brand: product?.brand || "",
-      stock: product?.stock || 0,
+      title: product?.title ?? "",
+      description: product?.description ?? "",
+      price: product?.price ?? 1,
+      category: product?.category ?? "",
+      brand: product?.brand ?? "",
+      stock: product?.stock ?? 0,
     },
   });
 
   useEffect(() => {
     reset({
-      title: product?.title || "",
-      description: product?.description || "",
-      price: product?.price || 1,
-      category: product?.category || "",
-      brand: product?.brand || "",
-      stock: product?.stock || 0,
+      title: product?.title ?? "",
+      description: product?.description ?? "",
+      price: product?.price ?? 1,
+      category: product?.category ?? "",
+      brand: product?.brand ?? "",
+      stock: product?.stock ?? 0,
     });
   }, [product, reset]);
 

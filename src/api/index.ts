@@ -1,5 +1,4 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { toast } from "react-toastify";
 
 import { handleAPIError } from "@/lib/errors";
 
@@ -29,7 +28,7 @@ api.interceptors.response.use(
   (response) => response,
   async (err) => {
     const error = err as AxiosError;
-    const originalRequest = error.config as CustomAxiosRequestConfig;
+    // const originalRequest = error.config as CustomAxiosRequestConfig;
 
     // If the error status is 401 and there is no originalRequest._retry flag,
     // it means the token has expired and we need to refresh it

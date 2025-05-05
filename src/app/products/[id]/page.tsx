@@ -1,43 +1,44 @@
-// src/app/products/[id]/page.tsx
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import { type Metadata } from "next";
+import type { Product } from "@/components/table/ProductTable";
 
-// Dynamic title function using generateMetadata
-export async function generateMetadata({ params }: { params: { id: string } }) {
-   const { id } = await params;
+// Define a type that matches the expected SegmentParams
+type ProductParams = {
+  id: string;
+};
 
-    // Fetch product by ID using the parameter directly (no need to await params)
+// Match the PageProps interface from your Next.js config
+interface PageProps {
+  params: Promise<ProductParams>;
+  searchParams?: Promise<Record<string, string | string[]>>;
+}
+
+// Implement generateMetadata with the correct param structure
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  // Await the params since they're a Promise according to PageProps
+  const { id } = await params;
+
   const res = await fetch(`https://dummyjson.com/products/${id}`);
-
-  // Check if the response is OK, if not return the notFound page
   if (!res.ok) return { title: "Product not found – MyShop" };
 
-  // Parse the product data from the response
-  const product = await res.json();
-
-  // Return dynamic title for this product page
+  const product = (await res.json()) as Product;
   return {
-    title: `${product.title} – MyShop`, // Set title dynamically
+    title: `${product.title} – MyShop`,
   };
 }
 
-// Fetch product info using async/await correctly
-export default async function ProductPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  // Ensure params are awaited
+// Implement the page component with the correct param structure
+export default async function ProductPage({ params }: PageProps) {
+  // Await the params since they're a Promise according to PageProps
   const { id } = await params;
 
-  // Fetch product by ID
   const res = await fetch(`https://dummyjson.com/products/${id}`);
-
-  // Check if the response is OK, if not return the notFound page
   if (!res.ok) return notFound();
 
-  // Parse the product data from the response
-  const product = await res.json();
+  const product = await res.json() as Product;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -45,8 +46,8 @@ export default async function ProductPage({
 
       <div className="flex flex-col gap-6 sm:flex-row">
         <Image
-          src={product.thumbnail}
-          alt={product.title}
+          src={product.thumbnail ?? "/placeholder-image.jpg"}
+          alt={product.title ?? "Product image"}
           width={300}
           height={300}
           className="rounded shadow"

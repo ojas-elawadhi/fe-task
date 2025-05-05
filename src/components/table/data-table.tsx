@@ -3,7 +3,6 @@
 import {
   type Column,
   type ColumnDef,
-  type ColumnFiltersState,
   type ColumnPinningState,
   flexRender,
   getCoreRowModel,
@@ -11,12 +10,10 @@ import {
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   type SortingState,
   useReactTable,
-  type VisibilityState,
 } from "@tanstack/react-table";
-import { CircleAlert, Delete, Loader, Plus } from "lucide-react";
+import { CircleAlert, Loader } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,8 +26,6 @@ import {
 } from "@/components/ui/table";
 import { usePaginationStore } from "@/store/pagination";
 import { DataTablePagination } from "./data-table-pagination";
-import { DataTableToolbar } from "./data-table-toolbar";
-import Link from "next/link";
 import React from "react";
 import { useRouter } from "next/navigation";
 
@@ -45,13 +40,9 @@ interface DataTableProps<TData, TValue> {
   addHref?: string;
   addButton?: React.ElementType; // Updated to allow any React component
   deleteButton?: React.ElementType; // Updated to allow any React component
-  columnVisibility: VisibilityState;
-  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>;
   selectable?: boolean;
   sorting: SortingState;
   setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
-  columnFilters: ColumnFiltersState;
-  setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
 }
 
 export function DataTable<TData, TValue>({
@@ -60,18 +51,8 @@ export function DataTable<TData, TValue>({
   error,
   isLoading,
   refetch,
-  heading,
-  children,
-  addHref,
-  addButton: AddButton, // Use a capitalized name to indicate it's a component
-  deleteButton: DeleteButton, // Use a capitalized name to indicate it's a component
-  columnVisibility,
-  setColumnVisibility,
-  selectable = true,
   sorting,
   setSorting,
-  columnFilters,
-  setColumnFilters,
 }: DataTableProps<TData, TValue>) {
   const { pagination } = usePaginationStore();
   const [rowSelection, setRowSelection] = React.useState({});
@@ -86,7 +67,6 @@ export function DataTable<TData, TValue>({
     manualSorting: true, // ✅ Enable server-side sorting
     state: {
       sorting,
-      columnVisibility,
       rowSelection,
       columnPinning,
       pagination: {
@@ -97,7 +77,6 @@ export function DataTable<TData, TValue>({
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

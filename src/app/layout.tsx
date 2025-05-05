@@ -8,8 +8,6 @@ import { Geist } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "@/components/theme-provider";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 export const metadata: Metadata = {
   title: "FE task QuarbonaAI",
   description: "fe task for QuarbonaAI",
@@ -24,8 +22,6 @@ const geist = Geist({
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const queryClient = new QueryClient();
-
   return (
     <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
       <body>
